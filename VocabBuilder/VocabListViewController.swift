@@ -10,7 +10,7 @@ import UIKit
 
 class VocabListViewController: UITableViewController {
     
-    let itemArray = ["Word1", "Word2", "Word3"]
+    var itemArray = ["Word1", "Word2", "Word3"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +50,45 @@ class VocabListViewController: UITableViewController {
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
+    
+    
+    @IBAction func addWordPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Word", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Word", style: .default) { (action) in
+            //what happens when add item button is clicked in UIAlert
+            print("success!")
+            print(textField.text!)
+            
+            if textField.text == nil {
+                //debug stuff
+                print("nothing entered")
+            }else{
+                self.itemArray.append(textField.text!)
+                //debugg stuff
+                print(self.itemArray)
+                self.tableView.reloadData()
+            }
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Add New Word"
+            //debug stuff - this line below prints empty.
+            //print(alertTextField.text!)
+            textField = alertTextField
+            
+            
+        }
+        
+        
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
+        
+    }
+    
 }
 
