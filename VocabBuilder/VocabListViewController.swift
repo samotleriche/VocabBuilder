@@ -11,10 +11,17 @@ import UIKit
 class VocabListViewController: UITableViewController {
     
     var itemArray = ["Word1", "Word2", "Word3"]
+    
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        if let items = defaults.array(forKey: "WordListArray") as? [String]{
+            itemArray = items
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -63,11 +70,16 @@ class VocabListViewController: UITableViewController {
             print("success!")
             print(textField.text!)
             
+            
+            
             if textField.text == nil {
                 //debug stuff
                 print("nothing entered")
             }else{
                 self.itemArray.append(textField.text!)
+                
+                self.defaults.set(self.itemArray, forKey: "WordListArray")
+                
                 //debugg stuff
                 print(self.itemArray)
                 self.tableView.reloadData()
