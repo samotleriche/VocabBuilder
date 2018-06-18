@@ -10,18 +10,19 @@ import UIKit
 
 class VocabListViewController: UITableViewController {
     
-    var itemArray = ["Word1", "Word2", "Word3"]
+    var itemArray = [Word]()
     
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Words.plist")
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        if let items = defaults.array(forKey: "WordListArray") as? [String]{
-            itemArray = items
-        }
+        print(dataFilePath!)
         
+        loadItems()
+      
     }
 
     override func didReceiveMemoryWarning() {
@@ -36,9 +37,14 @@ class VocabListViewController: UITableViewController {
         }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "WordCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let word = itemArray[indexPath.row]
+        
+        cell.textLabel?.text = word.word
+        
+        cell.accessoryType = word.learned ? .checkmark : .none
         
         return cell
     }
@@ -46,14 +52,11 @@ class VocabListViewController: UITableViewController {
     //MARK - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        print(indexPath.row)
+        //print(itemArray[indexPath.row])
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].learned = !itemArray[indexPath.row].learned
         
+        saveItems()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -76,13 +79,13 @@ class VocabListViewController: UITableViewController {
                 //debug stuff
                 print("nothing entered")
             }else{
-                self.itemArray.append(textField.text!)
                 
-                self.defaults.set(self.itemArray, forKey: "WordListArray")
+                let newWord = Word()
+                newWord.word = textField.text!
                 
-                //debugg stuff
-                print(self.itemArray)
-                self.tableView.reloadData()
+                self.itemArray.append(newWord)
+                
+               self.saveItems()
             }
         }
         
@@ -100,6 +103,30 @@ class VocabListViewController: UITableViewController {
         
         present(alert, animated: true, completion: nil)
         
+    }
+    
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        }catch{
+            print("error: \(error)")
+        }
+        
+        self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+            itemArray = try decoder.decode([Word].self, from: data)
+            }catch{
+                print("error: \(error)")
+            }
+        }
     }
     
 }
