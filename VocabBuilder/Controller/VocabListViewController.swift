@@ -149,7 +149,7 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
         
         self.tableView.reloadData()
     }
-    
+    //
     func loadItems(with request: NSFetchRequest<Word> = Word.fetchRequest(), predicate: NSPredicate? = nil) {
        
         let categoryPredicate = NSPredicate(format: "parentDifficulty.name MATCHES %@", selectedCategory!.name!)
