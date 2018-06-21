@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14135" systemVersion="17F77" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
+        <attribute name="completed" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <relationship name="difficulty" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Word" inverseName="parentDifficulty" inverseEntity="Word" syncable="YES"/>
+    </entity>
+    <entity name="Word" representedClassName=".Word" syncable="YES" codeGenerationType="class">
+        <attribute name="learned" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="wordName" attributeType="String" syncable="YES"/>
+        <relationship name="parentDifficulty" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="difficulty" inverseEntity="Category" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Word" positionX="-2907" positionY="-1782" width="128" height="88"/>
+        <element name="Category" positionX="-3078" positionY="-1774" width="128" height="88"/>
+    </elements>
+</model>

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="gGh-IB-r7u">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="gGh-IB-r7u">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--VocabBuilder-->
+        <!--VocabWords-->
         <scene sceneID="tbI-qY-dy2">
             <objects>
                 <tableViewController id="EOz-M2-bFk" customClass="VocabListViewController" customModule="VocabBuilder" customModuleProvider="target" sceneMemberID="viewController">
@@ -17,9 +18,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <searchBar key="tableHeaderView" contentMode="redraw" id="0LJ-fx-VFY">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="56"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="EOz-M2-bFk" id="jYY-Uv-WLp"/>
+                            </connections>
+                        </searchBar>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="WordCell" id="vJ5-co-Ihi">
-                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="84" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="vJ5-co-Ihi" id="AV9-33-lTw">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
@@ -32,18 +41,26 @@
                             <outlet property="delegate" destination="EOz-M2-bFk" id="NHg-tV-eYo"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="VocabBuilder" id="xMg-wG-LhJ">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="ZB6-tv-m7k">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <connections>
-                                <action selector="addWordPressed:" destination="EOz-M2-bFk" id="pfR-NS-Pps"/>
-                            </connections>
-                        </barButtonItem>
+                    <navigationItem key="navigationItem" title="VocabWords" id="xMg-wG-LhJ">
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="ZB6-tv-m7k">
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <action selector="addWordPressed:" destination="EOz-M2-bFk" id="pfR-NS-Pps"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Remove" style="done" id="NYu-ra-FHb">
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <action selector="RemoveSelection:" destination="EOz-M2-bFk" id="VWY-4q-1Nj"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="heb-Mt-VDG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1695.2" y="131.78410794602701"/>
+            <point key="canvasLocation" x="1650" y="160"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="rWN-hp-ytj">
@@ -60,12 +77,51 @@
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="EOz-M2-bFk" kind="relationship" relationship="rootViewController" id="LAs-VZ-woH"/>
+                        <segue destination="ilO-Zb-5M1" kind="relationship" relationship="rootViewController" id="I4a-u8-dhw"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="g7s-ID-nUN" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="882" y="228"/>
+            <point key="canvasLocation" x="159" y="459"/>
+        </scene>
+        <!--VocabBuilder-->
+        <scene sceneID="xB7-g0-bve">
+            <objects>
+                <tableViewController id="ilO-Zb-5M1" customClass="CategoryViewController" customModule="VocabBuilder" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="h1D-U0-FdQ">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="CategoryCell" id="CX4-tL-fRa">
+                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="CX4-tL-fRa" id="ZaX-8a-CHO">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="ilO-Zb-5M1" id="IFw-5h-pU4"/>
+                            <outlet property="delegate" destination="ilO-Zb-5M1" id="6Ww-N2-xJw"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="VocabBuilder" id="Cx2-c4-AbP">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="gkB-Ef-t2U">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="AddButtonPressed:" destination="ilO-Zb-5M1" id="KYB-EN-HVM"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <segue destination="EOz-M2-bFk" kind="show" identifier="goToWords" id="qed-gv-Rvy"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gdL-7k-1On" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="897" y="-82"/>
         </scene>
     </scenes>
 </document>

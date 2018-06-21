@@ -7,22 +7,26 @@
 //
 
 import UIKit
+import CoreData
 
-class VocabListViewController: UITableViewController {
+class VocabListViewController: UITableViewController, UISearchBarDelegate {
     
     var itemArray = [Word]()
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Words.plist")
+    var selectedCategory : Category? {
+        didSet{
+            loadItems()
+        }
+    }
     
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        print(dataFilePath!)
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        loadItems()
-      
     }
 
     override func didReceiveMemoryWarning() {
@@ -42,7 +46,7 @@ class VocabListViewController: UITableViewController {
         
         let word = itemArray[indexPath.row]
         
-        cell.textLabel?.text = word.word
+        cell.textLabel?.text = word.wordName
         
         cell.accessoryType = word.learned ? .checkmark : .none
         
@@ -51,16 +55,48 @@ class VocabListViewController: UITableViewController {
     
     //MARK - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        //print(itemArray[indexPath.row])
+   
         
         itemArray[indexPath.row].learned = !itemArray[indexPath.row].learned
+        
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
         
         saveItems()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    @IBAction func RemoveSelection(_ sender: UIBarButtonItem) {
+        
+        
+        for (x, y) in itemArray.enumerated() {
+            
+            //print(x, "and ", y)
+            if y.learned == true {
+                
+                print(x, "needs deleting")
+                context.delete(itemArray[x])
+                itemArray.remove(at: x)
+                let request : NSFetchRequest<Word> = Word.fetchRequest()
+                loadItems(with: request)
+                //saveItems()
+                
+//                if let indexPath = tableView.indexPathForSelectedRow {
+//                    destinationVC.selectedCategory = categoryArray[indexPath.row]
+//                }
+            }
+            
+        }
+        
+        
+//        context.delete(itemArray[0])
+//        itemArray.remove(at: 0)
+        
+        saveItems()
+        
+        
+    }
     
     @IBAction func addWordPressed(_ sender: UIBarButtonItem) {
         
@@ -68,9 +104,10 @@ class VocabListViewController: UITableViewController {
         
         let alert = UIAlertController(title: "Add New Word", message: "", preferredStyle: .alert)
         
-        let action = UIAlertAction(title: "Add Word", style: .default) { (action) in
+        let action = UIAlertAction(title: "Add Word", style: .default) { (action)
+            in
             //what happens when add item button is clicked in UIAlert
-            print("success!")
+            print("add button pressed!")
             print(textField.text!)
             
             
@@ -79,13 +116,14 @@ class VocabListViewController: UITableViewController {
                 //debug stuff
                 print("nothing entered")
             }else{
-                
-                let newWord = Word()
-                newWord.word = textField.text!
+                let newWord = Word(context: self.context)
+                newWord.wordName = textField.text!
+                newWord.learned = false
+                newWord.parentDifficulty = self.selectedCategory
                 
                 self.itemArray.append(newWord)
                 
-               self.saveItems()
+                self.saveItems()
             }
         }
         
@@ -94,38 +132,68 @@ class VocabListViewController: UITableViewController {
             //debug stuff - this line below prints empty.
             //print(alertTextField.text!)
             textField = alertTextField
-            
-            
         }
-        
         
         alert.addAction(action)
         
         present(alert, animated: true, completion: nil)
-        
     }
     
     func saveItems() {
-        let encoder = PropertyListEncoder()
         
         do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+            try context.save()
         }catch{
-            print("error: \(error)")
+            print("error saving context: \(error)")
         }
         
         self.tableView.reloadData()
     }
     
-    func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-            itemArray = try decoder.decode([Word].self, from: data)
-            }catch{
-                print("error: \(error)")
+    func loadItems(with request: NSFetchRequest<Word> = Word.fetchRequest(), predicate: NSPredicate? = nil) {
+       
+        let categoryPredicate = NSPredicate(format: "parentDifficulty.name MATCHES %@", selectedCategory!.name!)
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        }else{
+            request.predicate = categoryPredicate
+        }
+        
+//        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, predicate])
+//
+//        request.predicate = compoundPredicate
+        
+        
+        do{
+            itemArray = try context.fetch(request)
+        }catch{
+            print("error fetching: \(error)")
+        }
+        tableView.reloadData()
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        let request : NSFetchRequest<Word> = Word.fetchRequest()
+        
+        //print(searchBar.text!)
+        
+        let predicate = NSPredicate(format: "wordName CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "wordName", ascending: true)]
+        
+        loadItems(with: request, predicate: predicate)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
             }
+            
         }
     }
     
