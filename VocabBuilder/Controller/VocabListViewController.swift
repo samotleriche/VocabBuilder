@@ -7,11 +7,13 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class VocabListViewController: UITableViewController, UISearchBarDelegate {
     
-    var itemArray = [Word]()
+    var todoWords: Results<Word>?
+    let realm = try! Realm()
+    
     
     var selectedCategory : Category? {
         didSet{
@@ -19,8 +21,6 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
         }
     }
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -37,63 +37,45 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
     //MARK - Tableview Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArray.count
+        return todoWords?.count ?? 1
         }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "WordCell", for: indexPath)
         
-        let word = itemArray[indexPath.row]
+        if let word = todoWords?[indexPath.row] {
         
-        cell.textLabel?.text = word.wordName
+            cell.textLabel?.text = word.title
         
-        cell.accessoryType = word.learned ? .checkmark : .none
-        
+            cell.accessoryType = word.learned ? .checkmark : .none
+        }else{
+            cell.textLabel?.text = "no items added"
+        }
         return cell
     }
     
     //MARK - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
    
+        if let word = todoWords?[indexPath.row] {
+            do{
+                try realm.write {
+                    word.learned = !word.learned
+                    //realm.delete(word)
+                }
+            }catch{
+                print(error)
+            }
+        }
         
-        itemArray[indexPath.row].learned = !itemArray[indexPath.row].learned
+        tableView.reloadData()
         
-//        context.delete(itemArray[indexPath.row])
-//        itemArray.remove(at: indexPath.row)
-        
-        saveItems()
-        
+    
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
     @IBAction func RemoveSelection(_ sender: UIBarButtonItem) {
-        
-        
-        for (x, y) in itemArray.enumerated() {
-            
-            //print(x, "and ", y)
-            if y.learned == true {
-                
-                print(x, "needs deleting")
-                context.delete(itemArray[x])
-                itemArray.remove(at: x)
-                let request : NSFetchRequest<Word> = Word.fetchRequest()
-                loadItems(with: request)
-                //saveItems()
-                
-//                if let indexPath = tableView.indexPathForSelectedRow {
-//                    destinationVC.selectedCategory = categoryArray[indexPath.row]
-//                }
-            }
-            
-        }
-        
-        
-//        context.delete(itemArray[0])
-//        itemArray.remove(at: 0)
-        
-        saveItems()
         
         
     }
@@ -107,24 +89,20 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
         let action = UIAlertAction(title: "Add Word", style: .default) { (action)
             in
             //what happens when add item button is clicked in UIAlert
-            print("add button pressed!")
-            print(textField.text!)
             
-            
-            
-            if textField.text == nil {
-                //debug stuff
-                print("nothing entered")
-            }else{
-                let newWord = Word(context: self.context)
-                newWord.wordName = textField.text!
-                newWord.learned = false
-                newWord.parentDifficulty = self.selectedCategory
-                
-                self.itemArray.append(newWord)
-                
-                self.saveItems()
+            if let currentCategory = self.selectedCategory {
+                do {
+                    try self.realm.write{
+                        let newWord = Word()
+                        newWord.title = textField.text!
+                        newWord.dateAdded = Date()
+                        currentCategory.words.append(newWord)
+                    }
+                }catch {
+                    print("error saving: \(error)")
+                }
             }
+            self.tableView.reloadData()
         }
         
         alert.addTextField { (alertTextField) in
@@ -139,61 +117,30 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
         present(alert, animated: true, completion: nil)
     }
     
-    func saveItems() {
+    
+    func loadItems() {
+
+        todoWords = selectedCategory?.words.sorted(byKeyPath: "title", ascending: true)
         
-        do {
-            try context.save()
-        }catch{
-            print("error saving context: \(error)")
-        }
-        
-        self.tableView.reloadData()
-    }
-    //
-    func loadItems(with request: NSFetchRequest<Word> = Word.fetchRequest(), predicate: NSPredicate? = nil) {
-       
-        let categoryPredicate = NSPredicate(format: "parentDifficulty.name MATCHES %@", selectedCategory!.name!)
-        
-        if let additionalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
-        }else{
-            request.predicate = categoryPredicate
-        }
-        
-//        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, predicate])
-//
-//        request.predicate = compoundPredicate
-        
-        
-        do{
-            itemArray = try context.fetch(request)
-        }catch{
-            print("error fetching: \(error)")
-        }
         tableView.reloadData()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
-        let request : NSFetchRequest<Word> = Word.fetchRequest()
+        todoWords = todoWords?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateAdded", ascending: true)
+
+        tableView.reloadData()
         
-        //print(searchBar.text!)
-        
-        let predicate = NSPredicate(format: "wordName CONTAINS[cd] %@", searchBar.text!)
-        
-        request.sortDescriptors = [NSSortDescriptor(key: "wordName", ascending: true)]
-        
-        loadItems(with: request, predicate: predicate)
     }
-    
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
             loadItems()
-            
+
             DispatchQueue.main.async {
                 searchBar.resignFirstResponder()
             }
-            
+
         }
     }
     
