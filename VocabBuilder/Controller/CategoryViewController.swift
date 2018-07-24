@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeViewController {
     
     let realm = try! Realm()
 
@@ -21,7 +22,17 @@ class CategoryViewController: UITableViewController {
 
         
         loadCategories()
+        
+        tableView.separatorStyle = .none
+        
+        
+        if let navBar = navigationController?.navigationBar {
+         
+            navBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor : FlatWhite()]
+            
+        }
     }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -34,17 +45,25 @@ class CategoryViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+      
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+      
+        if let category = categoryArray?[indexPath.row] {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        
-        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "no categories selected"
-        
-        if categoryArray?[indexPath.row].learned == true {
-            cell.accessoryType = .checkmark
-        }else{
-            cell.accessoryType = .none
+            cell.textLabel?.text = category.name
+            
+            guard let categoryColor = UIColor(hexString: category.color) else { fatalError() }
+            
+            cell.backgroundColor = categoryColor
+            
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+            
+            if categoryArray?[indexPath.row].learned == true {
+                cell.accessoryType = .checkmark
+            }else{
+                cell.accessoryType = .none
+            }
         }
-        
         return cell
     }
     
@@ -83,6 +102,7 @@ class CategoryViewController: UITableViewController {
                 let newCategory = Category()
                 newCategory.name = textField.text!
                 newCategory.learned = false
+                newCategory.color = UIColor.randomFlat.hexValue()
                 
                 self.save(category: newCategory)
             }
@@ -122,11 +142,19 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    
-    //MARK: - TableView Delegate Methods
-    
-    
-    
-    //MARK: - Data Manipulation Methods
-    
+    override func updateModel(at indexPath: IndexPath) {
+        if let categoryToDelete = self.categoryArray?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(categoryToDelete)
+                }
+            }catch{
+                print(error)
+            }
+            //tableView.reloadData()
+        }
+    }
 }
+
+
+

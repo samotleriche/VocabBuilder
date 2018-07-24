@@ -8,12 +8,14 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class VocabListViewController: UITableViewController, UISearchBarDelegate {
+class VocabListViewController: SwipeViewController, UISearchBarDelegate {
     
     var todoWords: Results<Word>?
     let realm = try! Realm()
     
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var selectedCategory : Category? {
         didSet{
@@ -25,15 +27,54 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        
+        tableView.separatorStyle = .none
+        
         
     }
+    override func viewWillAppear(_ animated: Bool) {
+        
+        title = selectedCategory?.name
+        
+        guard let hexcolor = selectedCategory?.color else { fatalError() }
+        
+        updateNavBar(withHexCode: hexcolor)
+    }
+    
+   
+    override func viewDidAppear(_ animated: Bool) {
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
 
+        updateNavBar(withHexCode: "2A43FF")
+        
+        
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
 
+    //MARK - NAV BAR SETUP METHODS
+    
+    func updateNavBar(withHexCode colorHexCode: String) {
+        
+        guard let navBar = navigationController?.navigationBar else {fatalError("nav controller doesnt exist")}
+        
+        guard let navBarColor = UIColor(hexString: colorHexCode) else { fatalError() }
+        
+        navBar.barTintColor = navBarColor
+        
+        navBar.tintColor = ContrastColorOf((navBarColor), returnFlat: true)
+        
+        navBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor : ContrastColorOf(navBarColor, returnFlat: true)]
+        
+        searchBar.barTintColor = navBarColor
+    }
+    
+    
     //MARK - Tableview Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -42,12 +83,21 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "WordCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let word = todoWords?[indexPath.row] {
         
             cell.textLabel?.text = word.title
         
+            if let color = UIColor(hexString: selectedCategory!.color)?.darken(byPercentage:
+                CGFloat(indexPath.row) / CGFloat(todoWords!.count)){
+                cell.backgroundColor = color
+                
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+            }
+            
+           
+            
             cell.accessoryType = word.learned ? .checkmark : .none
         }else{
             cell.textLabel?.text = "no items added"
@@ -123,6 +173,19 @@ class VocabListViewController: UITableViewController, UISearchBarDelegate {
         todoWords = selectedCategory?.words.sorted(byKeyPath: "title", ascending: true)
         
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let word = todoWords?[indexPath.row] {
+            do{
+                try realm.write {
+                    realm.delete(word)
+                }
+            }catch{
+                print(error)
+            }
+            
+        }
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {

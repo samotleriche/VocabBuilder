@@ -12,6 +12,7 @@ import RealmSwift
 class Category : Object{
     @objc dynamic var name : String = ""
     @objc dynamic var learned : Bool = false
+    @objc dynamic var color : String = ""
     
     let words = List<Word>()
 }

@@ -15,6 +15,7 @@
 		0AA88AEE20DB84F900F00CA9 /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA88AED20DB84F900F00CA9 /* CategoryViewController.swift */; };
 		0AA88AF220DC64EA00F00CA9 /* Word.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA88AF120DC64EA00F00CA9 /* Word.swift */; };
 		0AA88AF420DC64F700F00CA9 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA88AF320DC64F700F00CA9 /* Category.swift */; };
+		0AA88AF620DEDA6B00F00CA9 /* SwipeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA88AF520DEDA6B00F00CA9 /* SwipeViewController.swift */; };
 		7CF79217C92F404AC3BD2983 /* Pods_VocabBuilder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA19D3D98B3EA3ADE73A630C /* Pods_VocabBuilder.framework */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +31,7 @@
 		0AA88AED20DB84F900F00CA9 /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		0AA88AF120DC64EA00F00CA9 /* Word.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Word.swift; sourceTree = "<group>"; };
 		0AA88AF320DC64F700F00CA9 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		0AA88AF520DEDA6B00F00CA9 /* SwipeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeViewController.swift; sourceTree = "<group>"; };
 		4C39BA0E9C29E77834346D81 /* Pods-VocabBuilder.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VocabBuilder.release.xcconfig"; path = "Pods/Target Support Files/Pods-VocabBuilder/Pods-VocabBuilder.release.xcconfig"; sourceTree = "<group>"; };
 		EA19D3D98B3EA3ADE73A630C /* Pods_VocabBuilder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VocabBuilder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -60,6 +62,7 @@
 			children = (
 				0AA88AED20DB84F900F00CA9 /* CategoryViewController.swift */,
 				0A56328E20C8EC540066AF24 /* VocabListViewController.swift */,
+				0AA88AF520DEDA6B00F00CA9 /* SwipeViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -223,13 +226,17 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-VocabBuilder/Pods-VocabBuilder-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwipeCellKit/SwipeCellKit.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwipeCellKit.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -248,6 +255,7 @@
 				0AA88AF220DC64EA00F00CA9 /* Word.swift in Sources */,
 				0A56328D20C8EC540066AF24 /* AppDelegate.swift in Sources */,
 				0AA88AF420DC64F700F00CA9 /* Category.swift in Sources */,
+				0AA88AF620DEDA6B00F00CA9 /* SwipeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
